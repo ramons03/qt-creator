@@ -175,6 +175,8 @@ void WatchData::setType(const QString &str)
         type = "QMap<QString,QVariant>";
     else if (type == "QVariantList")
         type = "QList<QVariant>";
+    else if (type == "QObjectList")
+        type = "QList<QObject*>";
 
     bool changed = true;
     while (changed) {
