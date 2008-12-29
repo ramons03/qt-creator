@@ -1982,6 +1982,16 @@ static void qDumpQVariantHelper(const void *data, QString *value,
                     .arg((quintptr)data);
         *numchild = v.toStringList().size();
         break;
+    case QVariant::List:
+        *exp = QString(QLatin1String("((QVariant*)%1)->d.data.c"))
+                    .arg((quintptr)data);
+        *numchild = v.toList().size();
+        break;
+    case QVariant::Map:
+        *exp = QString(QLatin1String("((QVariant*)%1)->d.data.c"))
+                    .arg((quintptr)data);
+        *numchild = v.toMap().size();
+        break;
     case QVariant::Int:
         *value = QString::number(v.toInt());
         *numchild= 0;
@@ -2452,6 +2462,7 @@ void qDumpObjectData440(
             "\""NS"QHash\","
             "\""NS"QHashNode\","
             "\""NS"QImage\","
+            "\""NS"QList\","
             "\""NS"QLocale\","
             "\""NS"QMap\","
             "\""NS"QMapNode\","

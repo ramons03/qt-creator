@@ -170,6 +170,12 @@ void WatchData::setValueToolTip(const QString &tooltip)
 void WatchData::setType(const QString &str)
 {
     type = str.trimmed();
+
+    if (type == "QVariantMap")
+        type = "QMap<QString,QVariant>";
+    else if (type == "QVariantList")
+        type = "QList<QVariant>";
+
     bool changed = true;
     while (changed) {
         if (type.endsWith("const"))
