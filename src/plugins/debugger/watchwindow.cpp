@@ -43,6 +43,7 @@
 #include <QtGui/QMenu>
 #include <QtGui/QResizeEvent>
 #include <QtGui/QSplitter>
+#include <QtGui/QScrollBar>
 
 using namespace Debugger::Internal;
 
@@ -57,6 +58,7 @@ enum { INameRole = Qt::UserRole, VisualRole, ExpandedRole };
 WatchWindow::WatchWindow(Type type, QWidget *parent)
     : QTreeView(parent), m_type(type)
     , m_alwaysResizeColumnsToContents(true)
+    , m_oldVerticalScrollBarValue(-1)
 {
     setWindowTitle(tr("Locals and Watchers"));
     setAlternatingRowColors(true);
@@ -195,6 +197,9 @@ void WatchWindow::setModel(QAbstractItemModel *model)
     header()->setResizeMode(QHeaderView::ResizeToContents);
     if (m_type != LocalsType)
         header()->hide();
+
+    connect(model, SIGNAL(layoutAboutToBeChanged()), this, SLOT(saveVerticalScrollBarValue()));
+    connect(model, SIGNAL(modelReset()), this, SLOT(restoreVerticalScrollBarValue()));
 }
 
 void WatchWindow::resetHelper(const QModelIndex &idx)
@@ -215,3 +220,14 @@ void WatchWindow::handleChangedItem(QWidget *widget)
         requestAssignValue("foo", lineEdit->text());
 }
 
+void WatchWindow::saveVerticalScrollBarValue()
+{
+    m_oldVerticalScrollBarValue = verticalScrollBar()->value();
+    m_oldSelection = currentIndex();
+}
+
+void WatchWindow::restoreVerticalScrollBarValue()
+{
+    setCurrentIndex(m_oldSelection);
+    verticalScrollBar()->setValue(m_oldVerticalScrollBarValue);
+}

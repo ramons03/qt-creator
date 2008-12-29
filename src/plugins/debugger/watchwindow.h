@@ -73,6 +73,9 @@ private slots:
     void expandNode(const QModelIndex &index);
     void collapseNode(const QModelIndex &index);
 
+    void saveVerticalScrollBarValue();
+    void restoreVerticalScrollBarValue();
+
 private:
     void keyPressEvent(QKeyEvent *ev);
     void contextMenuEvent(QContextMenuEvent *ev);
@@ -83,6 +86,8 @@ private:
 
     bool m_alwaysResizeColumnsToContents;
     Type m_type;
+    int m_oldVerticalScrollBarValue;
+    QModelIndex m_oldSelection;
 };
 
 
