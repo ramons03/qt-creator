@@ -1503,6 +1503,10 @@ void GdbEngine::exitDebugger()
     m_dataDumperState = DataDumperUninitialized;
     m_shared = 0;
     qq->debugDumpersAction()->setChecked(false);
+
+#ifdef Q_OS_MAC
+    macDisableQtLibraryDebugging();
+#endif
 }
 
 
@@ -1542,6 +1546,10 @@ bool GdbEngine::startDebugger()
     qDebug() << "BuildDir: " << q->m_buildDir;
     qDebug() << "ExeFile: " << q->m_executable;
     #endif
+
+#ifdef Q_OS_MAC
+    macEnableQtLibraryDebugging();
+#endif
 
     q->showStatusMessage(tr("Starting Debugger"));
     emit gdbInputAvailable(QString(), theGdbSettings().m_gdbCmd + ' ' + gdbArgs.join(" "));
@@ -3991,3 +3999,76 @@ IDebuggerEngine *createGdbEngine(DebuggerManager *parent)
     return new GdbEngine(parent);
 }
 
+#ifdef Q_OS_MAC
+QStringList GdbEngine::macQtFrameworks() const
+{
+    QStringList result;
+
+    QString qtDir;
+    foreach(QString env, q->m_environment) {
+        QStringList p = env.split("=");
+        if (!p.isEmpty() && p.first() == "QTDIR") {
+            p.takeFirst();
+            qtDir = p.join("=");
+            break;
+        }
+    }
+
+    if (qtDir.isEmpty())
+        return result;
+
+    QStringList frameworks;
+    frameworks << "Qt3Support";
+    frameworks << "QtAssistant";
+    frameworks << "QtCore";
+    frameworks << "QtDBus";
+    frameworks << "QtDesigner";
+    frameworks << "QtDesignerComponents";
+    frameworks << "QtGui";
+    frameworks << "QtHelp";
+    frameworks << "QtNetwork";
+    frameworks << "QtOpenGL";
+    frameworks << "QtScript";
+    frameworks << "QtScriptTools";
+    frameworks << "QtSql";
+    frameworks << "QtSvg";
+    frameworks << "QtTest";
+    frameworks << "QtWebKit";
+    frameworks << "QtXml";
+    frameworks << "QtXmlPatterns";
+    frameworks << "phonon";
+
+    const int frameworkVersion = 4;
+
+    foreach(QString f, frameworks) {
+        QString path = QString("%1/lib/%2.framework/Versions/%3/%2")
+                       .arg(qtDir)
+                       .arg(f)
+                       .arg(frameworkVersion);
+
+        if (QFile::exists(path))
+            result << path;
+    }
+    return result;
+}
+
+void GdbEngine::macEnableQtLibraryDebugging()
+{
+    QFileInfo fi(q->m_executable);
+
+    foreach(QString f, macQtFrameworks()) {
+        QProcess::execute("install_name_tool", QStringList() << "-id" << f << QString("%1_debug").arg(f));
+        QProcess::execute("install_name_tool", QStringList() << "-change" << f << QString("%1_debug").arg(f) << fi.absoluteFilePath());
+    }
+}
+
+void GdbEngine::macDisableQtLibraryDebugging()
+{
+    QFileInfo fi(q->m_executable);
+
+    foreach(QString f, macQtFrameworks()) {
+        QProcess::execute("install_name_tool", QStringList() << "-id" << QString("%1_debug").arg(f) << QString("%1_debug").arg(f));
+        QProcess::execute("install_name_tool", QStringList() << "-change" << QString("%1_debug").arg(f) << f << fi.absoluteFilePath());
+    }
+}
+#endif

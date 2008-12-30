@@ -328,6 +328,12 @@ private:
     void setWatchDataType(WatchData &data, const GdbMi &mi);
     void setLocals(const QList<GdbMi> &locals);
 
+#ifdef Q_OS_MAC
+    QStringList macQtFrameworks() const;
+    void macEnableQtLibraryDebugging();
+    void macDisableQtLibraryDebugging();
+#endif
+
     QString m_editedData;
     int m_pendingRequests;
     int m_inferiorPid;
