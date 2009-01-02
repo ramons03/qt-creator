@@ -31,48 +31,19 @@
 **
 ***************************************************************************/
 
-#ifndef FAKEVIM_HANDLER_H
-#define FAKEVIM_HANDLER_H
+#include "handler.h"
 
-#include <QObject>
+#include <QtTest/QtTest>
+#include <QtCore/QSet>
 
-QT_BEGIN_NAMESPACE
-class QString;
-class QEvent;
-QT_END_NAMESPACE
-
-namespace FakeVim {
-namespace Internal {
-
-class FakeVimHandler : public QObject
+class tst_FakeVim : public QObject
 {
     Q_OBJECT
 
-public:
-    FakeVimHandler(QObject *parent = 0);
-    ~FakeVimHandler();
-
-    // The same handler can be installed on several widgets
-    void addWidget(QWidget *widget);
-    void removeWidget(QWidget *widget);
-
-    // This executes an "ex" style command taking context
-    // information from \p widget;
-    void handleCommand(QWidget *widget, const QString &cmd);
-
-signals:
-    void commandBufferChanged(const QString &msg);
-    void quitRequested(QWidget *);
-
-private:
-    bool eventFilter(QObject *ob, QEvent *ev);
-
-    class Private;
-    friend class Private;
-    Private *d;
+private slots:
 };
 
-} // namespace Internal
-} // namespace FakeVim
 
-#endif // FAKEVIM_H
+QTEST_MAIN(tst_FakeVim)
+
+#include "main.moc"

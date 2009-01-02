@@ -32,22 +32,21 @@
 ***************************************************************************/
 
 #include "LookupContext.h"
+#include "ResolveExpression.h"
+#include "Overview.h"
+
 #include <CoreTypes.h>
 #include <Symbols.h>
 #include <Literals.h>
 #include <Names.h>
 #include <Scope.h>
 #include <Control.h>
-#include <cplusplus/Overview.h>
 
 #include <QtDebug>
 
 using namespace CPlusPlus;
 
-/////////////////////////////////////////////////////////////////////
-// LookupUtils
-/////////////////////////////////////////////////////////////////////
-bool LookupUtils::isNameCompatibleWithIdentifier(Name *name, Identifier *id)
+bool LookupContext::isNameCompatibleWithIdentifier(Name *name, Identifier *id)
 {
     if (! name) {
         return false;
